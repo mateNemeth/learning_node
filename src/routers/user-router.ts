@@ -20,8 +20,8 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
-  const user = await db.knex('users').where('id', id);
-  if (!user) throw new NotFoundError('User not found');
+  const user = await db.knex('users').where('id', id).first();
+  if (!user) throw new ConflictError('User not found');
 
   res.status(200).send(user);
 });
@@ -29,8 +29,8 @@ router.get('/:id', async (req, res) => {
 router.post('/register', async (req: CustomRequest<IUserRegister>, res) => {
   const { name, email } = req.body;
 
-  const existingUser = await db.knex('users').where('email', email);
-  if (existingUser.length) throw new ConflictError('Email already in use');
+  const existingUser = await db.knex('users').where('email', email).first();
+  if (existingUser) throw new ConflictError('Email already in use');
 
   await db.knex('users').insert({ name, email });
 
@@ -40,8 +40,8 @@ router.post('/register', async (req: CustomRequest<IUserRegister>, res) => {
 router.delete('/delete/:id', async (req, res) => {
   const { id } = req.params;
 
-  const existingUser = await db.knex('users').where('id', id);
-  if (!existingUser.length) throw new ConflictError('User not found');
+  const existingUser = await db.knex('users').where('id', id).first();
+  if (!existingUser) throw new ConflictError('User not found');
 
   await db.knex('users').where('id', id).del();
 
@@ -53,8 +53,8 @@ router.patch(
   async (req: CustomRequest<IUserDeactivate>, res) => {
     const { id } = req.body;
 
-    const existingUser = await db.knex('users').where('id', id);
-    if (!existingUser.length) throw new ConflictError('User not found');
+    const existingUser = await db.knex('users').where('id', id).first();
+    if (!existingUser) throw new ConflictError('User not found');
 
     await db.knex('users').where('id', id).update('active', false);
 
@@ -67,8 +67,8 @@ router.post(
   async (req: CustomRequest<IUserNameChange>, res) => {
     const { id, name } = req.body;
 
-    const existingUser = await db.knex('users').where('id', id);
-    if (!existingUser.length) throw new ConflictError('User not found');
+    const existingUser = await db.knex('users').where('id', id).first();
+    if (!existingUser) throw new ConflictError('User not found');
 
     await db.knex('users').where('id', id).update('name', name);
     res.status(204).send();
