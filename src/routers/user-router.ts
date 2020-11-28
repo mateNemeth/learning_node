@@ -43,7 +43,7 @@ router.delete('/delete/:id', async (req, res) => {
   const existingUser = await userRepository.findOne({ id: +id });
   if (!existingUser) throw new ConflictError('User not found');
 
-  await userRepository.delete({ id: +id });
+  await userRepository.delete(existingUser);
 
   res.sendStatus(204);
 });

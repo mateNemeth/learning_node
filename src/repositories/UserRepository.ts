@@ -54,16 +54,9 @@ export class UserRepository extends BaseRepository {
     return query;
   }
 
-  delete(options: Partial<User>): QueryBuilder<User, number> {
-    const query = this.baseQuery.clone().del();
-    for (const key in options) {
-      if (options.hasOwnProperty(key)) {
-        const value = options[key as keyof User];
-        query.modify((queryBuilder: QueryBuilder) => {
-          queryBuilder.where(key, value);
-        });
-      }
-    }
+  delete(user: User): QueryBuilder<User, number> {
+    const query = this.baseQuery.clone().where('id', user.id).del();
+
     return query;
   }
 }

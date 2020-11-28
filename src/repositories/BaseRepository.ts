@@ -13,5 +13,5 @@ export abstract class BaseRepository {
   abstract findOne(options: { [key: string]: any }): QueryBuilder;
   abstract insert(options: { [key: string]: any }): QueryBuilder;
   abstract update(entity: any, options: { [key: string]: any }): QueryBuilder;
-  abstract delete(options: { [key: string]: any }): QueryBuilder;
+  abstract delete(entity: any): QueryBuilder;
 }
