@@ -1,5 +1,4 @@
 import express from 'express';
-import { NotFoundError } from '../errors/not-found-error';
 import { Database } from '../database/database';
 import { ConflictError } from '../errors/conflict-error';
 import {
@@ -73,8 +72,8 @@ router.post(
     const existingUser = await userRepository.findOne({ id });
     if (!existingUser) throw new ConflictError('User not found');
 
-    await userRepository.update(existingUser, { name });
-    res.status(204).send();
+    const updated = await userRepository.update(existingUser, { name });
+    res.status(201).send(updated);
   }
 );
 

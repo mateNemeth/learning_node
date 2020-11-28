@@ -47,7 +47,7 @@ export class UserRepository extends BaseRepository {
       if (options.hasOwnProperty(key)) {
         const value = options[key as keyof User];
         query.modify((queryBuilder: QueryBuilder) => {
-          queryBuilder.update(key, value);
+          queryBuilder.update(key, value, '*');
         });
       }
     }
