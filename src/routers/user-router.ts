@@ -8,19 +8,20 @@ import {
   IUserNameChange,
   IUserRegister,
 } from '../interfaces/requests';
+import { UserRepository } from '../repositories/UserRepository';
 
 const router = express.Router();
-const db = Database.getInstance();
+const userRepository = new UserRepository(Database.getInstance());
 
 router.get('/', async (req, res) => {
-  const allActiveUsers = await db.knex('users').where('active', true);
+  const allActiveUsers = await userRepository.findAll({ active: true });
 
   res.status(200).send(allActiveUsers);
 });
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
-  const user = await db.knex('users').where('id', id).first();
+  const user = await userRepository.findOne({ id: +id });
   if (!user) throw new ConflictError('User not found');
 
   res.status(200).send(user);
@@ -29,23 +30,23 @@ router.get('/:id', async (req, res) => {
 router.post('/register', async (req: CustomRequest<IUserRegister>, res) => {
   const { name, email } = req.body;
 
-  const existingUser = await db.knex('users').where('email', email).first();
+  const existingUser = await userRepository.findOne({ email });
   if (existingUser) throw new ConflictError('Email already in use');
 
-  await db.knex('users').insert({ name, email });
+  const result = await userRepository.insert({ name, email });
 
-  res.status(201).send();
+  res.status(201).send(result);
 });
 
 router.delete('/delete/:id', async (req, res) => {
   const { id } = req.params;
 
-  const existingUser = await db.knex('users').where('id', id).first();
+  const existingUser = await userRepository.findOne({ id: +id });
   if (!existingUser) throw new ConflictError('User not found');
 
-  await db.knex('users').where('id', id).del();
+  await userRepository.delete({ id: +id });
 
-  res.status(204).send();
+  res.sendStatus(204);
 });
 
 router.patch(
@@ -53,10 +54,12 @@ router.patch(
   async (req: CustomRequest<IUserDeactivate>, res) => {
     const { id } = req.body;
 
-    const existingUser = await db.knex('users').where('id', id).first();
+    const existingUser = await userRepository.findOne({ id });
     if (!existingUser) throw new ConflictError('User not found');
 
-    await db.knex('users').where('id', id).update('active', false);
+    await userRepository.update(existingUser, {
+      active: false,
+    });
 
     res.status(204).send();
   }
@@ -67,10 +70,10 @@ router.post(
   async (req: CustomRequest<IUserNameChange>, res) => {
     const { id, name } = req.body;
 
-    const existingUser = await db.knex('users').where('id', id).first();
+    const existingUser = await userRepository.findOne({ id });
     if (!existingUser) throw new ConflictError('User not found');
 
-    await db.knex('users').where('id', id).update('name', name);
+    await userRepository.update(existingUser, { name });
     res.status(204).send();
   }
 );
