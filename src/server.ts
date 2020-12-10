@@ -5,12 +5,14 @@ import { json } from 'body-parser';
 import { errorHandler } from './middlewares/error-handler';
 import { NotFoundError } from './errors/not-found-error';
 import { userRouter } from './routers/user-router';
+import { notificationsRouter } from './routers/notifications-router';
 
 const port = 3000;
 const app = express();
 app.use(json());
 
 app.use('/users', userRouter);
+app.use('/notification-templates', notificationsRouter);
 
 app.all('*', (req, res) => {
   throw new NotFoundError();
